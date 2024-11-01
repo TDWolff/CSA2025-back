@@ -37,19 +37,22 @@ class UserAPI(Resource):
             try:
                 # Add the user with a command line utility
                 subprocess.run(["sudo", "-S", "useradd", "-m", username], input=sudo_password + '\n', text=True, check=True)
-
+            
                 # Set the password for the user
                 subprocess.run(f"echo '{username}:{password}' | sudo -S chpasswd", input=sudo_password + '\n', shell=True, text=True, check=True)
-
+            
                 # Add the user to the sudo group
                 subprocess.run(["sudo", "-S", "usermod", "-aG", "sudo", username], input=sudo_password + '\n', text=True, check=True)
-
+            
+                # Set the default shell to /bin/bash
+                subprocess.run(["sudo", "-S", "chsh", "-s", "/bin/bash", username], input=sudo_password + '\n', text=True, check=True)
+            
                 # Copy default shell configuration files
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.bashrc", f"/home/{username}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.profile", f"/home/{username}/.profile"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "chown", f"{username}:{username}", f"/home/{username}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "chown", f"{username}:{username}", f"/home/{username}/.profile"], input=sudo_password + '\n', text=True, check=True)
-
+            
                 return make_response(jsonify({"message": "User created successfully"}), 201)
             except subprocess.CalledProcessError as e:
                 return make_response(jsonify({"error": f"Failed to create user: {str(e)}"}), 500)
