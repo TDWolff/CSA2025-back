@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | Create User</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('/static/images/login.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            text-align: center;
+            width: 300px;
+        }
+        .container h2 {
+            margin-bottom: 20px;
+        }
+        .container input {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .container input.valid {
+            border-color: #28a745;
+            box-shadow: 0 0 5px #28a745;
+        }
+        .container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .container button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .container button:hover:enabled {
+            background-color: #218838;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .password-requirements {
+            font-size: 0.7em;
+            font-style: italic;
+            color: red;
+            text-align: left;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Create User</h2>
+        <form id="createUserForm">
+            <input type="text" id="username" name="username" placeholder="Username" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <div class="password-requirements" id="passwordRequirements">
+                Must include 1 special character, 1 number, 1 uppercase, 1 lowercase letter, and be at least 5 characters long.
+            </div>
+            <button type="submit" disabled>Create User</button>
+            <div class="error" id="error"></div>
+        </form>
+    </div>
+
+    <script>
+        function validatePassword(password) {
+            const requirements = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{5,}$/;
+            return requirements.test(password);
+        }
+
+        function validateForm() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const passwordRequirements = document.getElementById('passwordRequirements');
+            const createButton = document.querySelector('button[type="submit"]');
+
+            if (username && validatePassword(password)) {
+                passwordRequirements.style.display = 'none';
+                document.getElementById('password').classList.add('valid');
+                createButton.disabled = false;
+            } else {
+                passwordRequirements.style.display = 'block';
+                document.getElementById('password').classList.remove('valid');
+                createButton.disabled = true;
+            }
+        }
+
+        document.getElementById('username').addEventListener('input', validateForm);
+        document.getElementById('password').addEventListener('input', validateForm);
+
+        document.getElementById('createUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+
+            if (!validatePassword(password)) {
+                errorDiv.textContent = 'Password does not meet the requirements.';
+                return;
+            }
+
+            fetch('/api/create-user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    errorDiv.textContent = data.error;
+                } else {
+                    alert('User created successfully');
+                    errorDiv.textContent = '';
+                }
+            })
+            .catch(error => {
+                errorDiv.textContent = 'An error occurred';
+            });
+        });
+    </script>
+</body>
+</html>
