@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from flask_restful import Api, Resource
 import subprocess
 import re
@@ -25,14 +25,14 @@ class UserAPI(Resource):
             password = data.get("password")
             
             if not username or not password:
-                return jsonify({"error": "Username and password are required"}), 400
+                return make_response(jsonify({"error": "Username and password are required"}), 400)
             
             if not is_valid_username(username):
-                return jsonify({"error": "Invalid username format"}), 400
+                return make_response(jsonify({"error": "Invalid username format"}), 400)
             
             sudo_password = os.getenv("SUDO_PASSWORD")
             if not sudo_password:
-                return jsonify({"error": "Sudo password not found"}), 500
+                return make_response(jsonify({"error": "Sudo password not found"}), 500)
             
             try:
                 # Add the user with a command line utility
@@ -41,9 +41,9 @@ class UserAPI(Resource):
                 # Set the password for the user
                 subprocess.run(f"echo '{username}:{password}' | sudo -S chpasswd", input=sudo_password + '\n', shell=True, text=True, check=True)
 
-                return jsonify({"message": "User created successfully"}), 201
+                return make_response(jsonify({"message": "User created successfully"}), 201)
             except subprocess.CalledProcessError as e:
-                return jsonify({"error": f"Failed to create user: {str(e)}"}), 500
+                return make_response(jsonify({"error": f"Failed to create user: {str(e)}"}), 500)
 
 # Register the endpoint
 api.add_resource(UserAPI.CreateUser, '/create-user')
