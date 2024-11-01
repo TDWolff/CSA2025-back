@@ -54,5 +54,31 @@ class UserAPI(Resource):
             except subprocess.CalledProcessError as e:
                 return make_response(jsonify({"error": f"Failed to create user: {str(e)}"}), 500)
 
-# Register the endpoint
+    class DeleteUser(Resource):
+        def delete(self):
+            data = request.get_json()
+            
+            # Extract and validate username
+            username = data.get("username")
+            
+            if not username:
+                return make_response(jsonify({"error": "Username is required"}), 400)
+            
+            if not is_valid_username(username):
+                return make_response(jsonify({"error": "Invalid username format"}), 400)
+            
+            sudo_password = os.getenv("SUDO_PASSWORD")
+            if not sudo_password:
+                return make_response(jsonify({"error": "Sudo password not found"}), 500)
+            
+            try:
+                # Delete the user with a command line utility
+                subprocess.run(["sudo", "-S", "userdel", "-r", username], input=sudo_password + '\n', text=True, check=True)
+
+                return make_response(jsonify({"message": "User deleted successfully"}), 200)
+            except subprocess.CalledProcessError as e:
+                return make_response(jsonify({"error": f"Failed to delete user: {str(e)}"}), 500)
+
+# Register the endpoints
 api.add_resource(UserAPI.CreateUser, '/create-user')
+api.add_resource(UserAPI.DeleteUser, '/delete-user')
