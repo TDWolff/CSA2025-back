@@ -2,9 +2,10 @@ FROM docker.io/python:3.11
 
 WORKDIR /
 
-# --- [Install python and pip] ---
+# --- [Install python, pip, and sudo] ---
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y python3 python3-pip git
+    apt-get install -y python3 python3-pip git sudo
+
 COPY . /
 
 RUN pip install --no-cache-dir -r requirements.txt
