@@ -132,8 +132,7 @@
                 if (data.error) {
                     errorDiv.textContent = data.error;
                 } else {
-                    alert('User created successfully');
-                    errorDiv.textContent = '';
+                    window.location.href = `/user-details.html?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
                 }
             })
             .catch(error => {
