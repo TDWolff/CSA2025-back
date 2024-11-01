@@ -89,7 +89,7 @@
         }
 
         function validateForm() {
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.toLowerCase();
             const password = document.getElementById('password').value;
             const passwordRequirements = document.getElementById('passwordRequirements');
             const createButton = document.querySelector('button[type="submit"]');
@@ -111,7 +111,7 @@
         document.getElementById('createUserForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.toLowerCase();
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('error');
 
@@ -132,7 +132,9 @@
                 if (data.error) {
                     errorDiv.textContent = data.error;
                 } else {
-                    window.location.href = `/user-details.html?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('password', password);
+                    window.location.href = '/landing';
                 }
             })
             .catch(error => {

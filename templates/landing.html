@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Details</title>
+    <title>{{ title }} | User Details</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -37,12 +37,13 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const username = urlParams.get('username');
-        const password = urlParams.get('password');
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = localStorage.getItem('username');
+            const password = localStorage.getItem('password');
 
-        document.getElementById('username').textContent = `Username: ${username}`;
-        document.getElementById('password').textContent = `Password: ${password}`;
+            document.getElementById('username').textContent = `Username: ${username}`;
+            document.getElementById('password').textContent = `Password: ${password}`;
+        });
     </script>
 </body>
 </html>
