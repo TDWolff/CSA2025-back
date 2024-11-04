@@ -56,18 +56,14 @@ class UserAPI(Resource):
                 # Add the user to the common group
                 subprocess.run(["sudo", "-S", "usermod", "-aG", common_group, username], input=sudo_password + '\n', text=True, check=True)
                 
-                # Set the default shell to /bin/bash
-                subprocess.run(["sudo", "-S", "chsh", "-s", "/bin/bash", username], input=sudo_password + '\n', text=True, check=True)
+                # Set the default shell to /bin/rbash (restricted bash)
+                subprocess.run(["sudo", "-S", "chsh", "-s", "/bin/rbash", username], input=sudo_password + '\n', text=True, check=True)
             
                 # Copy default shell configuration files to the shared directory
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.bashrc", f"{shared_dir}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.profile", f"{shared_dir}/.profile"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "chown", f"{username}:{common_group}", f"{shared_dir}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "chown", f"{username}:{common_group}", f"{shared_dir}/.profile"], input=sudo_password + '\n', text=True, check=True)
-                
-                # Restrict the user to the shared directory using rbash (restricted bash)
-                subprocess.run(["sudo", "-S", "ln", "-s", "/bin/rbash", f"/home/{username}/.rbash"], input=sudo_password + '\n', text=True, check=True)
-                subprocess.run(["sudo", "-S", "chsh", "-s", f"/home/{username}/.rbash", username], input=sudo_password + '\n', text=True, check=True)
             
                 return make_response(jsonify({"message": "User created successfully"}), 201)
             except subprocess.CalledProcessError as e:
