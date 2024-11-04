@@ -56,8 +56,8 @@ class UserAPI(Resource):
                 # Add the user to the common group
                 subprocess.run(["sudo", "-S", "usermod", "-aG", common_group, username], input=sudo_password + '\n', text=True, check=True)
                 
-                # Set the default shell to /bin/rbash (restricted bash)
-                subprocess.run(["sudo", "-S", "chsh", "-s", "/bin/rbash", username], input=sudo_password + '\n', text=True, check=True)
+                # Set the default shell to the custom restricted shell
+                subprocess.run(["sudo", "-S", "chsh", "-s", f"{shared_dir}/custom_rbash.sh", username], input=sudo_password + '\n', text=True, check=True)
             
                 # Copy default shell configuration files to the shared directory
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.bashrc", f"{shared_dir}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
@@ -87,6 +87,9 @@ class UserAPI(Resource):
                 return make_response(jsonify({"error": "Sudo password not found"}), 500)
             
             try:
+                # Forcefully terminate all processes for the user
+                subprocess.run(["sudo", "-S", "pkill", "-u", username], input=sudo_password + '\n', text=True, check=True)
+                
                 # Delete the user with a command line utility
                 subprocess.run(["sudo", "-S", "userdel", "-r", username], input=sudo_password + '\n', text=True, check=True)
 
