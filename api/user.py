@@ -56,8 +56,8 @@ class UserAPI(Resource):
                 # Add the user to the common group
                 subprocess.run(["sudo", "-S", "usermod", "-aG", common_group, username], input=sudo_password + '\n', text=True, check=True)
                 
-                # Set the default shell to the custom restricted shell
-                subprocess.run(["sudo", "-S", "chsh", "-s", f"{shared_dir}/custom_rbash.sh", username], input=sudo_password + '\n', text=True, check=True)
+                # Set the default shell to /bin/bash
+                subprocess.run(["sudo", "-S", "chsh", "-s", "/bin/bash", username], input=sudo_password + '\n', text=True, check=True)
             
                 # Copy default shell configuration files to the shared directory
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.bashrc", f"{shared_dir}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
