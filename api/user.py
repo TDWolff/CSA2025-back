@@ -45,7 +45,12 @@ class UserAPI(Resource):
                 subprocess.run(["sudo", "-S", "chmod", "2775", shared_dir], input=sudo_password + '\n', text=True, check=True)
                 
                 # Add the user with a command line utility and set the home directory to the shared directory
-                subprocess.run(["sudo", "-S", "useradd", "-m", "-d", shared_dir, username], input=sudo_password + '\n', text=True, check=True)
+                result = subprocess.run(["sudo", "-S", "useradd", "-m", "-d", shared_dir, username], input=sudo_password + '\n', text=True, capture_output=True)
+                if result.returncode != 0:
+                    if "already exists" in result.stderr:
+                        return make_response(jsonify({"error": "User already exists"}), 400)
+                    else:
+                        return make_response(jsonify({"error": f"Failed to create user: {result.stderr}"}), 500)
             
                 # Set the password for the user
                 subprocess.run(f"echo '{username}:{password}' | sudo -S chpasswd", input=sudo_password + '\n', shell=True, text=True, check=True)
