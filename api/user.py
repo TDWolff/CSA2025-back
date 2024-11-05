@@ -69,6 +69,9 @@ class UserAPI(Resource):
                 subprocess.run(["sudo", "-S", "cp", "/etc/skel/.profile", f"{shared_dir}/.profile"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "chown", f"{username}:{common_group}", f"{shared_dir}/.bashrc"], input=sudo_password + '\n', text=True, check=True)
                 subprocess.run(["sudo", "-S", "chown", f"{username}:{common_group}", f"{shared_dir}/.profile"], input=sudo_password + '\n', text=True, check=True)
+                
+                # Call the awsuser.sh script to create the AWS IAM user
+                subprocess.run(["/bin/bash", "awsuser.sh", username, password], check=True)
             
                 return make_response(jsonify({"message": "User created successfully"}), 201)
             except subprocess.CalledProcessError as e:
